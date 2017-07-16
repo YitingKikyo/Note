@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- 一般這種佈局比較複雜的，比如這個包括了一個側拉菜單的佈局和一個主界面的佈局，我們會把他們分成兩個文件-->
+    <!-- the main content view -->
+    <include layout="@layout/content_main" />
+
+    <!-- the navigation view -->
+    <include
+        layout="@layout/drawer_main"
+        android:layout_gravity="start"
+        android:layout_width="260dp"
+        android:layout_height="match_parent" />
+
+
+</android.support.v4.widget.DrawerLayout>

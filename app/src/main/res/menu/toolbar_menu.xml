@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- ShowAsAction指定了这个菜单项是否直接显示在toolbar上，还是显示在右上角点击后的菜单里-->
+    <item
+        android:id="@+id/toolbar_search"
+        android:orderInCategory="0"
+        android:title="@string/search"
+        android:icon="@drawable/search"
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        app:showAsAction="ifRoom|collapseActionView" />
+    <!-- ifRoom指的是如果空間允許，就直接顯示在Toolbar上-->
+
+    <item
+        android:id="@+id/toolbar_change"
+        android:orderInCategory="1"
+        android:title="@string/switch_layout"
+        app:showAsAction="never" />
+
+    <!--never指的是始終不顯示在Toolbar上，也就是在右上角的菜單種-->
+
+    <item
+        android:id="@+id/toolbar_about"
+        android:orderInCategory="2"
+        android:title="@string/about"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/toolbar_support"
+        android:orderInCategory="3"
+        android:title="@string/support_developer"
+        app:showAsAction="never" />
+</menu>

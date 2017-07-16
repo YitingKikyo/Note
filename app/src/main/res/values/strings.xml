@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Note</string>
+    <string name="all_notes">全部便簽</string>
+    <string name="open">打開</string>
+    <string name="close">關閉</string>
+    <string name="settings">設置</string>
+    <string name="switch_layout">切換佈局</string>
+    <string name="about">關於軟件</string>
+    <string name="support_developer">支持開發者</string>
+    <string name="search">搜索</string>
+</resources>
