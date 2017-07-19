@@ -13,6 +13,12 @@
     <!-- ifRoom指的是如果空間允許，就直接顯示在Toolbar上-->
 
     <item
+        android:id="@+id/toolbar_setting"
+        android:orderInCategory="2"
+        android:title="@string/setting"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/toolbar_change"
         android:orderInCategory="1"
         android:title="@string/switch_layout"
