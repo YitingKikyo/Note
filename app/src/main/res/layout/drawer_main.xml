@@ -62,6 +62,8 @@
         android:background="#f4f4f4"/>
 
     <LinearLayout
+        android:clickable="true"
+        android:id="@+id/new_file"
         android:layout_width="match_parent"
         android:layout_height="@dimen/drawer_file_list_height">
         <ImageView
@@ -90,6 +92,8 @@
         android:background="#f4f4f4"/>
 
     <LinearLayout
+        android:id="@+id/setting"
+        android:clickable="true"
         android:layout_width="match_parent"
         android:layout_height="@dimen/drawer_file_list_height">
         <ImageView

@@ -8,8 +8,8 @@
 
     <ImageView
         android:id="@+id/file_img"
-        android:layout_width="28dp"
-        android:layout_height="28dp"
+        android:layout_width="@dimen/drawer_file_list_img"
+        android:layout_height="@dimen/drawer_file_list_img"
         android:src="@drawable/folder"
         android:tint="#757575"
         android:layout_marginLeft="12dp"
