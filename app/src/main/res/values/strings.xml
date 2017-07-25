@@ -22,4 +22,6 @@
     <string name="ok">确定</string>
     <string name="rename">重命名</string>
     <string name="delete">刪除</string>
+    <string name="delete_failed">刪除失敗</string>
+    <string name="delete_succeed">刪除成功</string>
 </resources>

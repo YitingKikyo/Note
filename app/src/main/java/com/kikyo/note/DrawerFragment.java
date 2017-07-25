@@ -193,9 +193,13 @@ public class DrawerFragment extends Fragment {
 
 
     private void delete(NoteDirectory noteDirectory, int pos) {
-        mNoteDirectoryService.deleteDirectory(noteDirectory);
-        mNoteDirectories.remove(pos);
-        mNoteDirectoryList.getAdapter().notifyItemRemoved(pos);
+        if(mNoteDirectoryService.deleteDirectory(noteDirectory)){
+            mNoteDirectories.remove(pos);
+            mNoteDirectoryList.getAdapter().notifyItemRemoved(pos);
+            Toast.makeText(getContext(), R.string.delete_succeed, Toast.LENGTH_SHORT).show();
+        }else {
+            Toast.makeText(getContext(), R.string.delete_failed, Toast.LENGTH_SHORT).show();
+        }
     }
 
 }

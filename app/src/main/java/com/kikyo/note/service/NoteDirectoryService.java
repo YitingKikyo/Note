@@ -105,7 +105,7 @@ public class NoteDirectoryService {
         public void onCreate(SQLiteDatabase sqLiteDatabase) {
             //創建表。AUTOINCREMENT是自增，只对整数有用。还有文件名不好做键，可能有重复的；不过设计成不重复的也可以
             //这里有一个表的设计问题，就是要如何设计这个表以保存各个Note在哪个文件夹~。比如在这个表记录，或者在Note的表里记录。后面你写的时候再看一下。
-            sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS files (\n"
+            sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (\n"
                     + "id INTEGER PRIMARY KEY NOT NULL, "
                     + "name TEXT NOT NULL, "
                     + "note_count INTEGER"
