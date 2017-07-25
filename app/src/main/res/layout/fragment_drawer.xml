@@ -27,7 +27,7 @@
             android:layout_gravity="center"/>
 
         <TextView
-            android:id="@+id/file_name"
+            android:id="@+id/directory_name"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="match_parent"
@@ -39,7 +39,7 @@
             android:gravity="center_vertical"/>
 
         <TextView
-            android:id="@+id/file_num"
+            android:id="@+id/note_count"
             android:layout_width="40dp"
             android:layout_height="match_parent"
             android:text="2"
@@ -63,7 +63,7 @@
 
     <LinearLayout
         android:clickable="true"
-        android:id="@+id/new_file"
+        android:id="@+id/new_directory"
         android:layout_width="match_parent"
         android:layout_height="@dimen/drawer_file_list_height">
         <ImageView

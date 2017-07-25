@@ -14,8 +14,8 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.kikyo.note.dialog.OperationMenuDialogBuilder;
-import com.kikyo.note.module.File;
-import com.kikyo.note.service.FileService;
+import com.kikyo.note.module.NoteDirectory;
+import com.kikyo.note.service.NoteDirectoryService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,15 +28,15 @@ import java.util.List;
 public class DrawerFragment extends Fragment {
 
     private View mView;
-    private RecyclerView mFileList;
-    private List<File> mFiles = new ArrayList<>();
-    private FileService mFileService;
+    private RecyclerView mNoteDirectoryList;
+    private List<NoteDirectory> mNoteDirectories = new ArrayList<>();
+    private NoteDirectoryService mNoteDirectoryService;
 
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mFileService = new FileService(getContext());
+        mNoteDirectoryService = new NoteDirectoryService(getContext());
     }
 
     @Nullable
@@ -53,25 +53,25 @@ public class DrawerFragment extends Fragment {
     }
 
     private void initFileList() {
-        mFileList = (RecyclerView) mView.findViewById(R.id.drawer_layout_recycler_view);
-        mFileList.setLayoutManager(new LinearLayoutManager(getContext()));
-        mFiles = new ArrayList<>(mFileService.getAllFiles());
-        mFileList.setAdapter(new FileListAdapter(mFiles));
+        mNoteDirectoryList = (RecyclerView) mView.findViewById(R.id.drawer_layout_recycler_view);
+        mNoteDirectoryList.setLayoutManager(new LinearLayoutManager(getContext()));
+        mNoteDirectories = new ArrayList<>(mNoteDirectoryService.getAllDirectories());
+        mNoteDirectoryList.setAdapter(new NoteDirectoryListAdapter(mNoteDirectories));
     }
 
 
     public void setButtonListener() {
         //点击效果一般是点击一整列都会弹出对话框，而不是只能点击那个图标~
-        mView.findViewById(R.id.new_file).setOnClickListener(new View.OnClickListener() {
+        mView.findViewById(R.id.new_directory).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showNewFileDialog();
+                showNewDirectoryDialog();
             }
         });
     }
 
     //另外，不要因为函数名太长就用单词的前几个字母。除非是众所周知的在、缩写。
-    public void showNewFileDialog() {
+    public void showNewDirectoryDialog() {
         new MaterialDialog.Builder(getContext())
                 .title(R.string.create___)
                 .positiveText(R.string.ok)
@@ -79,111 +79,112 @@ public class DrawerFragment extends Fragment {
                 .input(getString(R.string.please_input_name), "", new MaterialDialog.InputCallback() {
                     @Override
                     public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
-                        createNewFile(input.toString());
+                        createNewDirectory(input.toString());
                     }
                 }).show();
     }
 
-    private void createNewFile(String name) {
-        File f = new File(name, 0);
+    private void createNewDirectory(String name) {
+        NoteDirectory f = new NoteDirectory(name, 0);
         //新建文件夹
-        boolean success = mFileService.insertFile(f);
+        boolean success = mNoteDirectoryService.insertDirectory(f);
         if (success) {
             //这里增加了一个File，重新设置Adapter的話效率低，直接通知他有新文件就好了
             //新建的文件，id是数据自动生成的，那么，我们加进mFiles的那个File是没有id的。
             //解决办法是，插入以后从数据库再重新获取整个文件列表，或者自己生成id。前者效率低但方便，先用这种方法。
             //我们只让mFiles等于另一个列表，但是传进adapter的那个列表并没有揹更改...我们还是采用第2把。
-            mFiles.add(f);
-            mFileList.getAdapter().notifyItemInserted(mFiles.size() - 1);
+            mNoteDirectories.add(f);
+            mNoteDirectoryList.getAdapter().notifyItemInserted(mNoteDirectories.size() - 1);
         }
         Toast.makeText(getContext(), success ? R.string.create_successfully : R.string.creat_failed, Toast.LENGTH_SHORT).show();
 
     }
 
 
-    private class FileListAdapter extends RecyclerView.Adapter<FileViewHolder> {
+    private class NoteDirectoryListAdapter extends RecyclerView.Adapter<NoteDirectoryViewHolder> {
 
-        private List<File> mFiles;
+        private List<NoteDirectory> mNoteDirectories;
 
-        FileListAdapter(List<File> files) {
-            mFiles = files;
+        NoteDirectoryListAdapter(List<NoteDirectory> noteDirectories) {
+            mNoteDirectories = noteDirectories;
         }
 
         @Override
-        public FileViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new FileViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.file_list_item, parent, false));
+        public NoteDirectoryViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            return new NoteDirectoryViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.file_list_item, parent, false));
         }
 
         @Override
-        public void onBindViewHolder(FileViewHolder holder, int position) {
-            File file = mFiles.get(position);
-            holder.file_name.setText(file.getFileName());
-            holder.file_num.setText(String.valueOf(file.getFileNum()));
+        public void onBindViewHolder(NoteDirectoryViewHolder holder, int position) {
+            NoteDirectory noteDirectory = mNoteDirectories.get(position);
+            holder.mDirectoryName.setText(noteDirectory.getName());
+            holder.mNoteCount.setText(String.valueOf(noteDirectory.getNoteCount()));
         }
 
 
         @Override
         public int getItemCount() {
-            return mFiles.size();
+            return mNoteDirectories.size();
         }
     }
 
-    private class FileViewHolder extends RecyclerView.ViewHolder {
+    private class NoteDirectoryViewHolder extends RecyclerView.ViewHolder {
 
-        TextView file_name, file_num;
+        //還有這個。一般來説在Java或者安卓裏變量命名是駝峰式的。這樣和其他Java本來的代碼就不會個格格不入。除非有强烈的個人喜好。
+        TextView mDirectoryName, mNoteCount;
 
-        FileViewHolder(final View itemView) {
+        NoteDirectoryViewHolder(final View itemView) {
             super(itemView);
             itemView.setOnLongClickListener(new View.OnLongClickListener() {
 
                 @Override
                 public boolean onLongClick(View v) {
                     int pos = getAdapterPosition();
-                    File file = mFiles.get(pos);
-                    showOperationDialog(file, pos);
+                    NoteDirectory noteDirectory = mNoteDirectories.get(pos);
+                    showOperationDialog(noteDirectory, pos);
                     return true;
                 }
             });
-            file_name = (TextView) itemView.findViewById(R.id.file_name);
-            file_num = (TextView) itemView.findViewById(R.id.file_num);
+            mDirectoryName = (TextView) itemView.findViewById(R.id.directory_name);
+            mNoteCount = (TextView) itemView.findViewById(R.id.note_count);
 
         }
     }
 
-    private void showOperationDialog(final File file, final int pos) {
+    private void showOperationDialog(final NoteDirectory noteDirectory, final int pos) {
         new OperationMenuDialogBuilder(getContext())
                 .operations(Arrays.asList(getString(R.string.rename), getString(R.string.delete)))
                 .selectListener(new OperationMenuDialogBuilder.OnOperationSelectListener() {
                     @Override
                     public void onSelect(String text, int position) {
                         if (position == 0) {
-                            showRenameFileDialog(file, pos);
+                            showRenameDirectoryDialog(noteDirectory, pos);
                         } else {
-                            delete(file, pos);
+                            delete(noteDirectory, pos);
                         }
                     }
                 })
                 .show();
     }
 
-    private void showRenameFileDialog(final File file, final int pos) {
+    private void showRenameDirectoryDialog(final NoteDirectory noteDirectory, final int pos) {
         new MaterialDialog.Builder(getContext())
                 .title(R.string.rename)
                 .positiveText(R.string.ok)
                 .negativeText(R.string.cancel)
-                .input(getString(R.string.please_input_name), file.getFileName(), new MaterialDialog.InputCallback() {
+                .input(getString(R.string.please_input_name), noteDirectory.getName(), new MaterialDialog.InputCallback() {
                     @Override
                     public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
-                        rename(file, input.toString(), pos);
+                        rename(noteDirectory, input.toString(), pos);
                     }
                 }).show();
     }
 
-    private void rename(File f, String newName, int pos) {
-        f.setFileName(newName);
-        if (mFileService.updateFile(f)) {
+    private void rename(NoteDirectory f, String newName, int pos) {
+        f.setName(newName);
+        if (mNoteDirectoryService.updateDirectory(f)) {
             //直接传一个位置就好了。至于那个有另一个参数的是什么意思，我们可以看看文档。一时看不懂，可以去网上查查
-            mFileList.getAdapter().notifyItemChanged(pos);
+            mNoteDirectoryList.getAdapter().notifyItemChanged(pos);
             Toast.makeText(getContext(), R.string.rename_succeed, Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(getContext(), R.string.rename_failed, Toast.LENGTH_SHORT).show();
@@ -191,10 +192,10 @@ public class DrawerFragment extends Fragment {
     }
 
 
-    private void delete(File file, int pos) {
-        mFileService.deleteFile(file);
-        mFiles.remove(pos);
-        mFileList.getAdapter().notifyItemRemoved(pos);
+    private void delete(NoteDirectory noteDirectory, int pos) {
+        mNoteDirectoryService.deleteDirectory(noteDirectory);
+        mNoteDirectories.remove(pos);
+        mNoteDirectoryList.getAdapter().notifyItemRemoved(pos);
     }
 
 }

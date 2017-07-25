@@ -1,33 +1,12 @@
 package com.kikyo.note;
 
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import com.kikyo.note.module.File;
-import com.kikyo.note.module.Note;
-import com.kikyo.note.service.FileService;
-import com.kikyo.note.service.NoteService;
-import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
-
-import java.util.ArrayList;
-import java.util.List;
 
 //首先，MainActivity太乱啦，先把他分成几个Fragment
 //这样的話MainActivity和几个Fragment就都比较少啦，各自负责自己的部分。
