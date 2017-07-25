@@ -13,4 +13,6 @@
     <string name="create">创建</string>
     <string name="creat_failed">创建失败</string>
     <string name="create_successfully">创建成功</string>
+    <string name="rename_succeed">重命名成功</string>
+    <string name="rename_failed">重命名失败</string>
 </resources>

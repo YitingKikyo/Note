@@ -1,5 +1,6 @@
 package com.kikyo.note;
 
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
@@ -52,12 +53,12 @@ public class MainActivity extends AppCompatActivity  {
         mNoteService = new NoteService(this);
         mFileService = new FileService(this);
         setUpViews();
-
     }
 
 
     private void setUpViews() {
         View view = View.inflate(this, R.layout.activity_main, null);
+
         //这里已经有一个set***了
         setContentView(view);
 
@@ -68,6 +69,9 @@ public class MainActivity extends AppCompatActivity  {
 
         initNoteList();
         initFileList();
+
+        setlistenners();
+
     }
 
     private void setUpToolbar() {
@@ -93,12 +97,6 @@ public class MainActivity extends AppCompatActivity  {
         mNoteList = (RecyclerView) findViewById(R.id.recycler_view);
         mNoteList.setLayoutManager(new LinearLayoutManager(this));
         mNotes = new ArrayList<>(mNoteService.getAllNotss());
-        if(mNotes.isEmpty()){
-            //在数据库加两个测试~
-            mNoteService.insertNote(new Note("啦啦啦", "嘿嘿嘿"));
-            mNoteService.insertNote(new Note("略略", "嘤嘤嘤"));
-            mNotes = new ArrayList<>(mNoteService.getAllNotss());
-        }
         mNoteList.setAdapter(new NoteListAdapter(mNotes));
         mNoteList.addItemDecoration(new HorizontalDividerItemDecoration.Builder(this)
                 .color(R.color.divider)
@@ -183,12 +181,6 @@ public class MainActivity extends AppCompatActivity  {
         mFileList = (RecyclerView) findViewById(R.id.drawer_layout_recycler_view);
         mFileList.setLayoutManager(new LinearLayoutManager(this));
         mFiles = new ArrayList<>(mFileService.getAllFiles());
-        if(mFiles.isEmpty()){
-            //在数据库加两个测试~
-            mFileService.insertFile(new File("嘿嘿文件", 2));
-            mFileService.insertFile(new File("略略文件", 1));
-            mFiles = new ArrayList<>(mFileService.getAllFiles());
-        }
         mFileList.setAdapter(new FileListAdapter(mFiles));
     }
 
@@ -250,23 +242,30 @@ public class MainActivity extends AppCompatActivity  {
                             //通过布局填充器获login_layout
                             View view1 = getLayoutInflater().inflate(R.layout.rename_file_dia,null);
 
-                            final EditText newFileName1 = (EditText) view1.findViewById(R.id.new_rename_file_name);
-                            newFileName1.setText( mFiles.get(pos).getFileName());
+                            final EditText newFileNameTextView = (EditText) view1.findViewById(R.id.new_rename_file_name);
+                            newFileNameTextView.setText( mFiles.get(pos).getFileName());
 
                             TextView tt1 = (TextView) view1.findViewById(R.id.sure_rename);
                             TextView tt2 = (TextView) view1.findViewById(R.id.cancel_rename);
 
-                            //id 弄错了，取消的id变成ensure_to_create了..倒错了
                             builder1.setView(view1);//设置login_layout为对话提示框
                             final AlertDialog dialog1 = builder1.show(); //显示Dialog对话框
 
                             tt1.setOnClickListener(new View.OnClickListener(){
                                 @Override
                                 public void onClick(View v) {
-                                    //现在这个报错的意思是，执行了EditText的getText()，但是这个EditText为null。也就是newFileFile为null。
-                                    String a = newFileName1.getText().toString().trim();
-                                    File f = new File(a, mFiles.get(pos).getFileNum());
-                                    mFileList.getAdapter().notifyItemChanged(pos, f);
+                                    //这个报错的意思，执行了EditText的getText()，但是这个EditText为null。也就是newFileFile为null。
+                                    String newName = newFileNameTextView.getText().toString().trim();
+                                    //刚刚debug发现id是null。正常来说不应该的。这是因为~
+                                    File f = mFiles.get(pos);
+                                    f.setFileName(newName);
+                                    if(mFileService.updateFile(f)){
+                                        //直接传一个位置就好了。至于那个有另一个参数的是什么意思，我们可以看看文档。一时看不懂，可以去网上查查
+                                        mFileList.getAdapter().notifyItemChanged(pos);
+                                        Toast.makeText(MainActivity.this, R.string.rename_succeed, Toast.LENGTH_SHORT).show();
+                                    }else {
+                                        Toast.makeText(MainActivity.this, R.string.rename_failed, Toast.LENGTH_SHORT).show();
+                                    }
                                     dialog1.dismiss();
                                     dialog.dismiss();
                                 }
@@ -300,7 +299,7 @@ public class MainActivity extends AppCompatActivity  {
     }
 
     public void setBottleButtonLis() {
-        //点击效果我们一般是点击一整列都会弹出对话框，而不是只能点击那个图标~
+        //点击效果一般是点击一整列都会弹出对话框，而不是只能点击那个图标~
         findViewById(R.id.new_file).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -338,6 +337,9 @@ public class MainActivity extends AppCompatActivity  {
                 boolean success = mFileService.insertFile(f);
                 if(success) {
                     //这里增加了一个File，重新设置Adapter的話效率低，直接通知他有新文件就好了
+                    //新建的文件，id是数据自动生成的，那么，我们加进mFiles的那个File是没有id的。
+                    //解决办法是，插入以后从数据库再重新获取整个文件列表，或者自己生成id。前者效率低但方便，先用这种方法。
+                    //我们只让mFiles等于另一个列表，但是传进adapter的那个列表并没有揹更改...我们还是采用第2把。
                     mFiles.add(f);
                     mFileList.getAdapter().notifyItemInserted(mFiles.size() - 1);
                 }
@@ -353,6 +355,19 @@ public class MainActivity extends AppCompatActivity  {
             }
         });
 
+    }
+
+    private void setlistenners() {
+        FloatingActionButton fb = (FloatingActionButton)findViewById(R.id.floatButton_newNote);
+        fb.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                Note n = new Note("新文件", "1");
+                mNotes.add(n);
+                mNoteService.insertNote(n);
+                mNoteList.getAdapter().notifyItemInserted(mNotes.size()-1);
+            }
+        });
     }
 
 }

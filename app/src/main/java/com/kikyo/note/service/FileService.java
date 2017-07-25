@@ -1,13 +1,16 @@
 package com.kikyo.note.service;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.preference.PreferenceManager;
 
 import com.kikyo.note.module.File;
 import com.kikyo.note.module.FileSQLiteTypeMapping;
 import com.pushtorefresh.storio.sqlite.StorIOSQLite;
 import com.pushtorefresh.storio.sqlite.impl.DefaultStorIOSQLite;
+import com.pushtorefresh.storio.sqlite.operations.put.PutResult;
 import com.pushtorefresh.storio.sqlite.queries.DeleteQuery;
 import com.pushtorefresh.storio.sqlite.queries.Query;
 
@@ -19,13 +22,17 @@ import java.util.List;
 
 public class FileService {
     public static final String FILE_TABLE_NAME = "files";
+    private static final String KEY_MAX_ID = FileService.class.getName() + ".max_id";
     private StorIOSQLite mFileStor;
+    //SharedPreferences是一个轻量级的保存数据的东西~
+    private SharedPreferences mSharedPreferences;
 
     public FileService(Context context) {
         mFileStor = DefaultStorIOSQLite.builder()
                 .sqliteOpenHelper(new FileService.FileSQLOpenHelper(context))
                 .addTypeMapping(File.class, new FileSQLiteTypeMapping())
                 .build();
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
     public List<File> getAllFiles(){
@@ -68,6 +75,7 @@ public class FileService {
     }
 
     public boolean insertFile(File file){
+        file.setId(getAndIncreaseMaxId());
         return mFileStor.put()
                 .object(file)
                 .prepare()
@@ -75,12 +83,22 @@ public class FileService {
                 .wasInserted();
     }
 
+    private int getAndIncreaseMaxId() {
+        //这个key只要是一个不会重复的字符串就好了
+        //一般为了避免重复，我们都是命名成"类全名.名称"。比如"com.kikyo.note.FileService.max_id"。
+        int maxId = mSharedPreferences.getInt(KEY_MAX_ID, 0);
+        mSharedPreferences.edit()
+                .putInt(KEY_MAX_ID, maxId + 1)
+                .apply();
+        return maxId;
+    }
+
     public boolean updateFile(File file){
-        return mFileStor.put()
+        PutResult putResult = mFileStor.put()
                 .object(file)
                 .prepare()
-                .executeAsBlocking()
-                .wasUpdated();
+                .executeAsBlocking();
+        return putResult.wasUpdated();
     }
 
 
@@ -99,13 +117,14 @@ public class FileService {
             //創建表。AUTOINCREMENT是自增，只对整数有用。还有文件名不好做键，可能有重复的；不过设计成不重复的也可以
             //这里有一个表的设计问题，就是要如何设计这个表以保存各个Note在哪个文件夹~。比如在这个表记录，或者在Note的表里记录。后面你写的时候再看一下。
             sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS files (\n"
-                    + "fileName TEXT PRIMARY KEY NOT NULL, "
+                    + "id INTEGER PRIMARY KEY NOT NULL, "
+                    + "fileName TEXT NOT NULL, "
                     + "fileNum INTEGER"
                     + ");");
         }
 
         @Override
-        public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
+        public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int i1) {
 
         }
     }

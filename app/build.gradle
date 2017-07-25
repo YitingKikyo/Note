@@ -32,9 +32,7 @@ dependencies {
     annotationProcessor 'com.pushtorefresh.storio:sqlite-annotations-processor:1.13.0'
     compile 'com.pushtorefresh.storio:sqlite-annotations:1.13.0'
     compile 'com.pushtorefresh.storio:sqlite:1.13.0'
-
-
-
+    compile 'com.android.support:design:25.3.1'
 
 
 }

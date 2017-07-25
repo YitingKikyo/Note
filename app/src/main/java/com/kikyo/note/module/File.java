@@ -10,31 +10,42 @@ import com.pushtorefresh.storio.sqlite.annotations.StorIOSQLiteType;
 
 public class File {
 
-    @StorIOSQLiteColumn(name = "fileName", key = true, ignoreNull = true)
-    String mfileName;
+    @StorIOSQLiteColumn(name = "id", key = true)
+    int mId;
+
+    @StorIOSQLiteColumn(name = "fileName")
+    String mFileName;
 
     @StorIOSQLiteColumn(name = "fileNum")
-    Integer mfileNum;
+    Integer mFileNum;
 
     public File(){}
 
     public File(String name, int num){
-        mfileName = name;
-        mfileNum = num;
+        mFileName = name;
+        mFileNum = num;
     }
 
     public void setFileName(String fileName) {
-        this.mfileName = fileName;
+        this.mFileName = fileName;
     }
     public String getFileName() {
-        return mfileName;
+        return mFileName;
     }
 
 
     public void setFileNum(int fileNum) {
-        this.mfileNum = fileNum;
+        this.mFileNum = fileNum;
     }
     public int getFileNum() {
-        return mfileNum;
+        return mFileNum;
+    }
+
+    public Integer getId() {
+        return mId;
+    }
+
+    public void setId(Integer id) {
+        mId = id;
     }
 }
