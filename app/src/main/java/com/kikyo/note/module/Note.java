@@ -16,7 +16,7 @@ public class Note {
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MM-dd HH:mm", Locale.getDefault());
 
-    @StorIOSQLiteColumn(name = "mId", key = true, ignoreNull = true)
+    @StorIOSQLiteColumn(name = "id", key = true, ignoreNull = true)
     Integer mId;
 
     @StorIOSQLiteColumn(name = "title")

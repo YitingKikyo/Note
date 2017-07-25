@@ -15,4 +15,11 @@
     <string name="create_successfully">创建成功</string>
     <string name="rename_succeed">重命名成功</string>
     <string name="rename_failed">重命名失败</string>
+    <string name="fragment_main">fragment_main</string>
+    <string name="fragment_drawer">fragment_drawer</string>
+    <string name="please_input_name">请输入名称</string>
+    <string name="create___">新建...</string>
+    <string name="ok">确定</string>
+    <string name="rename">重命名</string>
+    <string name="delete">刪除</string>
 </resources>

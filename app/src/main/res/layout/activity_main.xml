@@ -7,11 +7,16 @@
 
     <!-- 一般這種佈局比較複雜的，比如這個包括了一個側拉菜單的佈局和一個主界面的佈局，我們會把他們分成兩個文件-->
     <!-- the main content view -->
-    <include layout="@layout/content_main" />
+    <fragment
+        android:tag="@string/fragment_main"
+        android:name="com.kikyo.note.MainFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
     <!-- the navigation view -->
-    <include
-        layout="@layout/drawer_main"
+    <fragment
+        android:tag="@string/fragment_drawer"
+        android:name="com.kikyo.note.DrawerFragment"
         android:layout_gravity="start"
         android:layout_width="260dp"
         android:layout_height="match_parent" />
