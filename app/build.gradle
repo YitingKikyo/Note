@@ -34,7 +34,7 @@ dependencies {
     compile 'com.pushtorefresh.storio:sqlite:1.13.0'
     compile 'com.android.support:design:25.3.1'
     compile 'com.afollestad.material-dialogs:core:0.9.4.5'
-
+    compile 'org.greenrobot:eventbus:3.0.0'
 
 
 }

@@ -1,8 +1,10 @@
 package com.kikyo.note.service;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.preference.PreferenceManager;
 
 import com.kikyo.note.module.Note;
 import com.kikyo.note.module.NoteSQLiteTypeMapping;
@@ -12,6 +14,8 @@ import com.pushtorefresh.storio.sqlite.impl.DefaultStorIOSQLite;
 import com.pushtorefresh.storio.sqlite.queries.DeleteQuery;
 import com.pushtorefresh.storio.sqlite.queries.Query;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.List;
 
 /**
@@ -20,22 +24,28 @@ import java.util.List;
 
 public class NoteService {
 
-    public interface OnNoteDeleteListener {
-        void onNoteDelete(Note note);
+    public static class NoteDeleteEvent {
+        public Note note;
+
+        public NoteDeleteEvent(Note note) {
+            this.note = note;
+        }
     }
 
     public static final String NOTE_TABLE_NAME = "notes";
-
-    //这样就可以了。虽然就是我一直在打。不过你应该可以看懂把？其实只是API的搬运而已，就是看github上这个库怎么用，然后照着用
-    private StorIOSQLite mNoteStor;
+    private static final String KEY_MAX_ID = NoteService.class.getName() + ".max_id";
     private static NoteService sInstance;
-    private OnNoteDeleteListener mOnNoteDeleteListener;
+
+    private StorIOSQLite mNoteStor;
+    private SharedPreferences mSharedPreferences;
+
 
     public NoteService(Context context) {
         mNoteStor = DefaultStorIOSQLite.builder()
                 .sqliteOpenHelper(new NoteSQLOpenHelper(context))
                 .addTypeMapping(Note.class, new NoteSQLiteTypeMapping())
                 .build();
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
     public static void initInstance(Context context){
@@ -96,9 +106,8 @@ public class NoteService {
 
     public boolean deleteNote(Note note){
         if(deleteNoteById(note.getId())){
-            if(mOnNoteDeleteListener != null){
-                mOnNoteDeleteListener.onNoteDelete(note);
-            }
+            //发布一个Note揹删除的事件
+            EventBus.getDefault().post(new NoteDeleteEvent(note));
             return true;
         }
         return false;
@@ -117,11 +126,22 @@ public class NoteService {
     }
 
     public boolean insertNote(Note note){
+        note.setId(getAndIncreaseMaxId());
         return mNoteStor.put()
                 .object(note)
                 .prepare()
                 .executeAsBlocking()
                 .wasInserted();
+    }
+
+    private int getAndIncreaseMaxId() {
+        //这个key只要是一个不会重复的字符串就好了
+        //一般为了避免重复，我们都是命名成"类全名.名称"。比如"com.kikyo.note.NoteDirectoryService.max_id"。
+        int maxId = mSharedPreferences.getInt(KEY_MAX_ID, 0);
+        mSharedPreferences.edit()
+                .putInt(KEY_MAX_ID, maxId + 1)
+                .apply();
+        return maxId;
     }
 
     public boolean updateNote(Note note){
@@ -142,10 +162,6 @@ public class NoteService {
                     .build())
                 .prepare()
                 .executeAsBlocking();
-    }
-
-    public void setOnNoteDeleteListener(OnNoteDeleteListener onNoteDeleteListener) {
-        mOnNoteDeleteListener = onNoteDeleteListener;
     }
 
     //這是一個SQLite數據庫的輔助類。如果我們不用第三方庫的話，直接用android内置的api來讀寫SQL的話，就會用這個類去打開數據庫連接。現在我們用的這個庫要求 我們提供這個類。

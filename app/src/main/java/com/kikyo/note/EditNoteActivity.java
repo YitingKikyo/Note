@@ -51,7 +51,7 @@ public class EditNoteActivity extends AppCompatActivity {
     }
 
     private void getIntentFromMainFragment() {
-        Intent intent =getIntent();
+        Intent intent = getIntent();
         id = intent.getIntExtra(EXTRA_NOTE_ID, -1);
         mNote = mNoteService.getNoteById(id);
     }

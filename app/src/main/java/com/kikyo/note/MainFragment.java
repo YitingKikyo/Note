@@ -18,6 +18,9 @@ import com.kikyo.note.module.Note;
 import com.kikyo.note.service.NoteService;
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,32 +32,20 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class MainFragment extends Fragment {
 
-    //大概就這樣。通過StartActivityForResult啓動編輯的Activity。然後EditNoteActivity通過setResult把編輯的結果設置，
-    //在這個Fragment的onActivityResult的囘調裏獲取這個結果並判斷。至於這個REQUEST_CODE_EDIT_NOTE，衹是區分不同的請求的一個數字（0~65535），通常隨便設置一個就好了。
-    private static final int REQUEST_CODE_EDIT_NOTE = 2154;
+
+    //第三种。。用第三方库（推jian)比如EventBus。
 
     private View mView;
     private RecyclerView mNoteList;
     private List<Note> mNotes = new ArrayList<>();
     private NoteService mNoteService;
-    private int mEditNotePosition = -1;
-    private NoteService.OnNoteDeleteListener mOnNoteDeleteListener  = new NoteService.OnNoteDeleteListener() {
-        @Override
-        public void onNoteDelete(Note note) {
-            //剛剛因爲我們沒有重寫equals函數，比較Note説是用==，而這個Note是在EditActivity裏通過id重新構造出的
-            int pos = mNotes.indexOf(note);
-            if(pos >= 0){
-                mNotes.remove(pos);
-                mNoteList.getAdapter().notifyItemRemoved(pos);
-            }
-        }
-    };
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mNoteService = NoteService.getInstance();
-       // mNoteService.setOnNoteDeleteListener(mOnNoteDeleteListener);
+        //在这里注册事件监听
+        EventBus.getDefault().register(this);
     }
 
     @Nullable
@@ -96,25 +87,19 @@ public class MainFragment extends Fragment {
                 .build());
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == REQUEST_CODE_EDIT_NOTE){
-            int status = data.getIntExtra(EditNoteActivity.EXTRA_STATUS, 0);
-            if(status == EditNoteActivity.STATUS_DELETED && mEditNotePosition >= 0){
-                mNotes.remove(mEditNotePosition);
-                mNoteList.getAdapter().notifyItemRemoved(mEditNotePosition);
-            }
-        }
+    @Subscribe
+    public void onNoteDelete(NoteService.NoteDeleteEvent event){
+        int pos = mNotes.indexOf(event.note);
+        mNotes.remove(pos);
+        mNoteList.getAdapter().notifyItemRemoved(pos);
     }
+
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        //注意。一定要把這個Listener設置為null。因爲，NoteService的生命周期比這個MainFragment長。也就是，NoteService和整個應用的生命周期一樣長，
-        //但是這個MainFragment衹有在主頁面時才存活。如果這裏不設置為null，那麽NoteService就持有這個MainFragment的NoteDeletListener的引用，導致
-        //儅這個Fragment沒有再使用時，因爲NoteService仍然能引用到他，不能揹垃圾回收，從而導致内存泄漏。（如果現在不能完全理解先跳過）
-        mNoteService.setOnNoteDeleteListener(null);
+        //取消注册
+        EventBus.getDefault().unregister(this);
     }
 
     //最后一个。为什么RecyclerView要这样设计成ViewHolder和Adapter。
@@ -168,11 +153,10 @@ public class MainFragment extends Fragment {
                 @Override
                 public void onClick(View view) {
                     int pos = getAdapterPosition();
-                    mEditNotePosition = pos;
                     Note note = mNotes.get(pos);
                     //每次增加一個Activity，要在Manifest裏聲明她
-                    startActivityForResult(new Intent(getActivity(), EditNoteActivity.class)
-                        .putExtra(EditNoteActivity.EXTRA_NOTE_ID, note.getId()), REQUEST_CODE_EDIT_NOTE);
+                    startActivity(new Intent(getActivity(), EditNoteActivity.class)
+                        .putExtra(EditNoteActivity.EXTRA_NOTE_ID, (int) note.getId()));
 
                 }
             });
