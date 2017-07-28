@@ -20,17 +20,31 @@ import java.util.List;
 
 public class NoteService {
 
+    public interface OnNoteDeleteListener {
+        void onNoteDelete(Note note);
+    }
 
     public static final String NOTE_TABLE_NAME = "notes";
 
     //这样就可以了。虽然就是我一直在打。不过你应该可以看懂把？其实只是API的搬运而已，就是看github上这个库怎么用，然后照着用
     private StorIOSQLite mNoteStor;
+    private static NoteService sInstance;
+    private OnNoteDeleteListener mOnNoteDeleteListener;
 
     public NoteService(Context context) {
         mNoteStor = DefaultStorIOSQLite.builder()
                 .sqliteOpenHelper(new NoteSQLOpenHelper(context))
                 .addTypeMapping(Note.class, new NoteSQLiteTypeMapping())
                 .build();
+    }
+
+    public static void initInstance(Context context){
+        sInstance = new NoteService(context);
+    }
+
+    // 改成单粒模式。注意因为他需要一个Context來构造，所以我们要调用一次initInstance才能使用getInstance()
+    public static NoteService getInstance() {
+        return sInstance;
     }
 
     public List<Note> getAllNotss(){
@@ -81,10 +95,16 @@ public class NoteService {
     }
 
     public boolean deleteNote(Note note){
-        return deleteNoteById(note.getId());
+        if(deleteNoteById(note.getId())){
+            if(mOnNoteDeleteListener != null){
+                mOnNoteDeleteListener.onNoteDelete(note);
+            }
+            return true;
+        }
+        return false;
     }
 
-    public boolean deleteNoteById(Integer id) {
+    private boolean deleteNoteById(Integer id) {
         return mNoteStor.delete()
                 .byQuery(DeleteQuery.builder()
                         .table(NOTE_TABLE_NAME)
@@ -112,6 +132,21 @@ public class NoteService {
                 .wasUpdated();
     }
 
+    public Note getNoteById(int id) {
+        return mNoteStor.get()
+                .object(Note.class)
+                .withQuery(Query.builder()
+                    .table(NOTE_TABLE_NAME)
+                    .where("id = ?")
+                    .whereArgs(id)
+                    .build())
+                .prepare()
+                .executeAsBlocking();
+    }
+
+    public void setOnNoteDeleteListener(OnNoteDeleteListener onNoteDeleteListener) {
+        mOnNoteDeleteListener = onNoteDeleteListener;
+    }
 
     //這是一個SQLite數據庫的輔助類。如果我們不用第三方庫的話，直接用android内置的api來讀寫SQL的話，就會用這個類去打開數據庫連接。現在我們用的這個庫要求 我們提供這個類。
     private class NoteSQLOpenHelper extends SQLiteOpenHelper {

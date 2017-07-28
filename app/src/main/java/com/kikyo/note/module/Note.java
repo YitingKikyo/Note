@@ -71,4 +71,21 @@ public class Note {
     public void setId(Integer id) {
         mId = id;
     }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Note note = (Note) o;
+
+        return mId != null ? mId.equals(note.mId) : note.mId == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return mId != null ? mId.hashCode() : 0;
+    }
 }

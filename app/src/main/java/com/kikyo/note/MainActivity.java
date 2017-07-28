@@ -5,8 +5,12 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+
+import com.kikyo.note.service.NoteService;
 
 //首先，MainActivity太乱啦，先把他分成几个Fragment
 //这样的話MainActivity和几个Fragment就都比较少啦，各自负责自己的部分。
@@ -14,11 +18,13 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = "MainActivity";
     private Toolbar mToolbar;
+
     //Toolbar包括上面一栏的全部东西，比如标题，菜单图标, 搜索图标都是Toolbar的内容，不用自己用TextView, ImageView
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        NoteService.initInstance(this);
         setUpViews();
     }
 

@@ -24,4 +24,7 @@
     <string name="delete">刪除</string>
     <string name="delete_failed">刪除失敗</string>
     <string name="delete_succeed">刪除成功</string>
+    <string name="back">back</string>
+    <string name="forward">前進</string>
+    <string name="save">保存</string>
 </resources>
