@@ -25,6 +25,7 @@ public class EditNoteActivity extends AppCompatActivity {
     public static final String EXTRA_NOTE_ID = "note_id";
     public static final String EXTRA_STATUS = "status";
     public static final int STATUS_DELETED = 1;
+    public static final String EXTRA_EDIT_TEXT = "edit_text";
 
 
     private int id;
@@ -87,7 +88,17 @@ public class EditNoteActivity extends AppCompatActivity {
     }
 
     private void saveNote() {
-
+        String text = ((EditText)findViewById(R.id.edit_note)).getText().toString();
+        mNote.setContent(text);
+        if(mNoteService.updateNote(mNote)){
+            setResult(RESULT_OK, new Intent()
+            .putExtra(EXTRA_EDIT_TEXT, text));
+            Toast.makeText(EditNoteActivity.this, R.string.edit_succeed, Toast.LENGTH_SHORT).show();
+        }
+        else{
+            Toast.makeText(EditNoteActivity.this, R.string.edit_failed, Toast.LENGTH_SHORT).show();
+        }
+        finish();
     }
 
     private void deleteNote() {

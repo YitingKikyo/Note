@@ -24,7 +24,6 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by 婷 on 2017/7/25.
@@ -92,6 +91,13 @@ public class MainFragment extends Fragment {
         int pos = mNotes.indexOf(event.note);
         mNotes.remove(pos);
         mNoteList.getAdapter().notifyItemRemoved(pos);
+    }
+
+    @Subscribe
+    public  void onNoteUpdate(NoteService.NoteUpdateContentEvent event){
+        int pos = mNotes.indexOf(event.note);
+        mNoteService.updateNote(event.note);
+        mNoteList.getAdapter().notifyItemChanged(pos);
     }
 
 

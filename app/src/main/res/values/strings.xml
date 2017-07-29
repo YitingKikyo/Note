@@ -27,4 +27,6 @@
     <string name="back">back</string>
     <string name="forward">前進</string>
     <string name="save">保存</string>
+    <string name="edit_succeed">更新成功</string>
+    <string name="edit_failed">更新失敗</string>
 </resources>

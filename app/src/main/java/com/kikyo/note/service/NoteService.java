@@ -32,6 +32,14 @@ public class NoteService {
         }
     }
 
+    public static class NoteUpdateContentEvent{
+        public Note note;
+
+        public NoteUpdateContentEvent(Note note){
+            this.note = note;
+        }
+    }
+
     public static final String NOTE_TABLE_NAME = "notes";
     private static final String KEY_MAX_ID = NoteService.class.getName() + ".max_id";
     private static NoteService sInstance;
@@ -145,11 +153,16 @@ public class NoteService {
     }
 
     public boolean updateNote(Note note){
-        return mNoteStor.put()
+        if( mNoteStor.put()
                 .object(note)
                 .prepare()
                 .executeAsBlocking()
-                .wasUpdated();
+                .wasUpdated()){
+            //发布一个Note揹更新的事件
+            EventBus.getDefault().post(new NoteUpdateContentEvent(note));
+            return true;
+        }
+        return false;
     }
 
     public Note getNoteById(int id) {
