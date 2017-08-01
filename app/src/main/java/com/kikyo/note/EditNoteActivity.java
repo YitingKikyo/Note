@@ -1,20 +1,19 @@
 package com.kikyo.note;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.kikyo.note.EditText.CustomEditText;
 import com.kikyo.note.module.Note;
 import com.kikyo.note.service.NoteService;
+
 /**
  * Created by 婷 on 2017/7/27.
  */
@@ -46,6 +45,7 @@ public class EditNoteActivity extends AppCompatActivity {
     private void setUpToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(mNote.getTitle());
+        toolbar.setTitleTextAppearance(getApplicationContext(), R.style.MenuItemTitle);
         setSupportActionBar(toolbar);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -58,7 +58,10 @@ public class EditNoteActivity extends AppCompatActivity {
     }
 
     private void setEditText() {
-        EditText editText = (EditText) findViewById(R.id.edit_note);
+        TextView dateText = (TextView) findViewById(R.id.edit_date);
+        dateText.setText( mNote.getDate());
+
+        CustomEditText editText = (CustomEditText) findViewById(R.id.edit_note);
         editText.setText(mNote.getContent());
     }
 
@@ -88,7 +91,7 @@ public class EditNoteActivity extends AppCompatActivity {
     }
 
     private void saveNote() {
-        String text = ((EditText)findViewById(R.id.edit_note)).getText().toString();
+        String text = ((CustomEditText)findViewById(R.id.edit_note)).getText().toString();
         mNote.setContent(text);
         if(mNoteService.updateNote(mNote)){
             setResult(RESULT_OK, new Intent()

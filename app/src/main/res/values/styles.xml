@@ -15,4 +15,16 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+
+    <style name="MenuItemTitle" parent="AppTheme">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+
+
+    <style name="MyToolbarTheme" parent="ThemeOverlay.AppCompat.ActionBar">
+        <item name="colorControlNormal">#ffffff</item><!-- 修改toolbar中按钮图标的颜色 -->
+    </style>
+
+
 </resources>

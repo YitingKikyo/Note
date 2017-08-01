@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+      xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <!-- ShowAsAction指定了这个菜单项是否直接显示在toolbar上，还是显示在右上角点击后的菜单里-->
     <item
@@ -9,7 +9,8 @@
         android:title="@string/search"
         android:icon="@drawable/search"
         app:actionViewClass="android.support.v7.widget.SearchView"
-        app:showAsAction="ifRoom|collapseActionView" />
+        app:showAsAction="ifRoom|collapseActionView"
+        />
     <!-- ifRoom指的是如果空間允許，就直接顯示在Toolbar上-->
 
     <item
