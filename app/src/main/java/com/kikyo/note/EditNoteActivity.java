@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,6 +31,7 @@ public class EditNoteActivity extends AppCompatActivity {
     private int id;
     private Note mNote;
     private NoteService mNoteService = NoteService.getInstance();
+    private EditText mEditText;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -59,10 +61,10 @@ public class EditNoteActivity extends AppCompatActivity {
 
     private void setEditText() {
         TextView dateText = (TextView) findViewById(R.id.edit_date);
-        dateText.setText( mNote.getDate());
+        dateText.setText(mNote.getDate());
 
-        CustomEditText editText = (CustomEditText) findViewById(R.id.edit_note);
-        editText.setText(mNote.getContent());
+        mEditText = (CustomEditText) findViewById(R.id.edit_note);
+        mEditText.setText(mNote.getContent());
     }
 
 
@@ -74,7 +76,7 @@ public class EditNoteActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.toolbar_delete:
                 deleteNote();
                 return true;
@@ -94,14 +96,14 @@ public class EditNoteActivity extends AppCompatActivity {
     }
 
     private void saveNote() {
-        String text = ((CustomEditText)findViewById(R.id.edit_note)).getText().toString();
+        //尽量不要每次都findViewById而是保持在变量里
+        String text = mEditText.getText().toString();
         mNote.setContent(text);
-        if(mNoteService.updateNote(mNote)){
+        if (mNoteService.updateNote(mNote)) {
             setResult(RESULT_OK, new Intent()
-            .putExtra(EXTRA_EDIT_TEXT, text));
+                    .putExtra(EXTRA_EDIT_TEXT, text));
             Toast.makeText(EditNoteActivity.this, R.string.edit_succeed, Toast.LENGTH_SHORT).show();
-        }
-        else{
+        } else {
             Toast.makeText(EditNoteActivity.this, R.string.edit_failed, Toast.LENGTH_SHORT).show();
         }
         finish();
@@ -112,11 +114,11 @@ public class EditNoteActivity extends AppCompatActivity {
         //应该是通过NoteServices删掉Note并通知MainFragment删掉这个Note
         //第一种办法，在NoteService那里弄一个OnNoteDeleteListener然后注册和通知
         //第二種方法，通過ActivityResult來獲取筆記是否揹刪除等。
-        if(mNoteService.deleteNote(mNote)){
+        if (mNoteService.deleteNote(mNote)) {
             setResult(RESULT_OK, new Intent()
-                .putExtra(EXTRA_STATUS, STATUS_DELETED));
+                    .putExtra(EXTRA_STATUS, STATUS_DELETED));
             Toast.makeText(EditNoteActivity.this, R.string.delete_succeed, Toast.LENGTH_SHORT).show();
-        }else {
+        } else {
             Toast.makeText(EditNoteActivity.this, R.string.delete_failed, Toast.LENGTH_SHORT).show();
         }
         //筆記刪除后應該退出編輯界面

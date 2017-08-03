@@ -6,28 +6,28 @@
         android:id="@+id/toolbar_undo"
         android:orderInCategory="0"
         android:title="@string/back"
-        android:icon="@drawable/ic_undo_white_36dp"
+        android:icon="@drawable/ic_undo_white_48dp"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/toolbar_redo"
         android:orderInCategory="1"
         android:title="@string/forward"
-        android:icon="@drawable/ic_redo_white_36dp"
+        android:icon="@drawable/ic_redo_white_48dp"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/toolbar_delete"
         android:orderInCategory="2"
         android:title="@string/delete"
-        android:icon="@drawable/ic_delete_white_36dp"
+        android:icon="@drawable/ic_delete_white_48dp"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/toolbar_save"
         android:orderInCategory="3"
         android:title="@string/save"
-        android:icon="@drawable/ic_save_white_36dp"
+        android:icon="@drawable/ic_save_white_48dp"
         app:showAsAction="always" />
 
 
