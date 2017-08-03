@@ -152,16 +152,21 @@ public class DrawerFragment extends Fragment {
     }
 
     private void showOperationDialog(final NoteDirectory noteDirectory, final int pos) {
+        //这里有个问题。我们要获取到这个Dialog然后调用他的dismiss才能消失。
+        //当我们想在onSelect里调用dismiss就有问题了。
+        //因为在selectListener那里dialog变量还没有创建完成（dialog变量是show返回的，而selectListener那里还没调用到show)，是不能使用的。
+        //但是我们知道当他被选中，也就是onSelect被调用的时候dialog肯定创建了。一种解决方法是。
         new OperationMenuDialogBuilder(getContext())
                 .operations(Arrays.asList(getString(R.string.rename), getString(R.string.delete)))
                 .selectListener(new OperationMenuDialogBuilder.OnOperationSelectListener() {
                     @Override
-                    public void onSelect(String text, int position) {
+                    public void onSelect(MaterialDialog dialog, String text, int position) {
                         if (position == 0) {
                             showRenameDirectoryDialog(noteDirectory, pos);
                         } else {
                             delete(noteDirectory, pos);
                         }
+                        dialog.dismiss();
                     }
                 })
                 .show();
@@ -193,11 +198,11 @@ public class DrawerFragment extends Fragment {
 
 
     private void delete(NoteDirectory noteDirectory, int pos) {
-        if(mNoteDirectoryService.deleteDirectory(noteDirectory)){
+        if (mNoteDirectoryService.deleteDirectory(noteDirectory)) {
             mNoteDirectories.remove(pos);
             mNoteDirectoryList.getAdapter().notifyItemRemoved(pos);
             Toast.makeText(getContext(), R.string.delete_succeed, Toast.LENGTH_SHORT).show();
-        }else {
+        } else {
             Toast.makeText(getContext(), R.string.delete_failed, Toast.LENGTH_SHORT).show();
         }
     }

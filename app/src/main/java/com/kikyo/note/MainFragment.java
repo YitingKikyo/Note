@@ -85,16 +85,19 @@ public class MainFragment extends Fragment {
     }
 
     @Subscribe
-    public void onNoteDelete(NoteService.NoteDeleteEvent event){
+    public void onNoteDelete(NoteService.NoteDeleteEvent event) {
         int pos = mNotes.indexOf(event.note);
         mNotes.remove(pos);
         mNoteList.getAdapter().notifyItemRemoved(pos);
     }
 
     @Subscribe
-    public  void onNoteUpdate(NoteService.NoteUpdateContentEvent event){
+    public void onNoteUpdate(NoteService.NoteUpdateContentEvent event) {
+        //问题出现在这里。这里接收到NoteUpdateContentEvent以后又执行了mNoteService.updateNote(event.note);
+        //然后updateNote又发布了一个事件，又在这里被接收，死循环了
         int pos = mNotes.indexOf(event.note);
-        mNoteService.updateNote(event.note);
+        //更新一下Note的内容
+        mNotes.set(pos, event.note);
         mNoteList.getAdapter().notifyItemChanged(pos);
     }
 
@@ -160,7 +163,7 @@ public class MainFragment extends Fragment {
                     Note note = mNotes.get(pos);
                     //每次增加一個Activity，要在Manifest裏聲明她
                     startActivity(new Intent(getActivity(), EditNoteActivity.class)
-                        .putExtra(EditNoteActivity.EXTRA_NOTE_ID, (int) note.getId()));
+                            .putExtra(EditNoteActivity.EXTRA_NOTE_ID, (int) note.getId()));
 
                 }
             });

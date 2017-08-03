@@ -22,9 +22,11 @@ import java.util.List;
 public class OperationMenuDialogBuilder extends MaterialDialog.Builder {
 
 
+    private MaterialDialog mDialog;
+
     public interface OnOperationSelectListener {
 
-        void onSelect(String text, int position);
+        void onSelect(MaterialDialog dialog, String text, int position);
 
     }
 
@@ -33,11 +35,11 @@ public class OperationMenuDialogBuilder extends MaterialDialog.Builder {
     private View.OnClickListener mOnItemClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if(mOperationSelectListener == null){
+            if (mOperationSelectListener == null) {
                 return;
             }
             OperationViewHolder h = (OperationViewHolder) mOperations.getChildViewHolder(v);
-            mOperationSelectListener.onSelect(h.text.getText().toString(), h.getAdapterPosition());
+            mOperationSelectListener.onSelect(mDialog, h.text.getText().toString(), h.getAdapterPosition());
         }
     };
 
@@ -49,21 +51,27 @@ public class OperationMenuDialogBuilder extends MaterialDialog.Builder {
         customView(view, false);
     }
 
-    public OperationMenuDialogBuilder operations(List<String> operations){
+    public OperationMenuDialogBuilder operations(List<String> operations) {
         mOperations.setAdapter(new OperationAdapter(operations));
         return this;
     }
 
-    public OperationMenuDialogBuilder selectListener(OnOperationSelectListener listener){
+    public OperationMenuDialogBuilder selectListener(OnOperationSelectListener listener) {
         mOperationSelectListener = listener;
         return this;
+    }
+
+    @Override
+    public MaterialDialog build() {
+        mDialog = super.build();
+        return mDialog;
     }
 
     private class OperationAdapter extends RecyclerView.Adapter<OperationViewHolder> {
 
         List<String> mOperations;
 
-         OperationAdapter(List<String> operations) {
+        OperationAdapter(List<String> operations) {
             mOperations = operations;
         }
 
@@ -87,7 +95,7 @@ public class OperationMenuDialogBuilder extends MaterialDialog.Builder {
 
         TextView text;
 
-         OperationViewHolder(View itemView) {
+        OperationViewHolder(View itemView) {
             super(itemView);
             text = (TextView) itemView.findViewById(R.id.text);
             itemView.setOnClickListener(mOnItemClickListener);
