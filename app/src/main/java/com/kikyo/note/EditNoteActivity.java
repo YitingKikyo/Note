@@ -85,6 +85,9 @@ public class EditNoteActivity extends AppCompatActivity {
                 return true;
             case R.id.toolbar_redo:
                 return true;
+            case android.R.id.home:
+                onBackPressed();
+                return true;
 
         }
         return super.onOptionsItemSelected(item);
