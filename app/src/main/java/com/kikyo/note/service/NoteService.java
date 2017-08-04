@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.preference.PreferenceManager;
+import android.support.v7.widget.RecyclerView;
 
 import com.kikyo.note.module.Note;
 import com.kikyo.note.module.NoteSQLiteTypeMapping;
@@ -16,7 +17,9 @@ import com.pushtorefresh.storio.sqlite.queries.Query;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentNavigableMap;
 
 /**
  * Created by 婷 on 2017/7/20.
@@ -43,6 +46,7 @@ public class NoteService {
     public static final String NOTE_TABLE_NAME = "notes";
     private static final String KEY_MAX_ID = NoteService.class.getName() + ".max_id";
     private static NoteService sInstance;
+    private List<Note> mNotes = getAllNotes();
 
     private StorIOSQLite mNoteStor;
     private SharedPreferences mSharedPreferences;
@@ -65,7 +69,7 @@ public class NoteService {
         return sInstance;
     }
 
-    public List<Note> getAllNotss(){
+    public List<Note> getAllNotes(){
         return mNoteStor.get()
                 .listOfObjects(Note.class)
                 .withQuery(Query.builder()
@@ -176,6 +180,77 @@ public class NoteService {
                 .prepare()
                 .executeAsBlocking();
     }
+
+    public List<Note> filter(List<Note> notes, String query) {
+        query = query.toLowerCase();
+
+        final List<Note> filteredModelList = new ArrayList<>();
+        for (Note note : notes) {
+
+            final String titleEn = note.getTitle().toLowerCase();
+            final String contentEn = note.getContent().toLowerCase();
+            final String title = note.getTitle();
+            final String content = note.getContent();
+
+            if (titleEn.contains(query) || contentEn.contains(query) || title.contains(query) || content.contains(query)) {
+
+                filteredModelList.add(note);
+            }
+        }
+        return filteredModelList;
+    }
+
+    public void animateTo(List<Note> models, RecyclerView r) {
+        applyAndAnimateRemovals(models, r);
+        applyAndAnimateAdditions(models, r);
+        applyAndAnimateMovedItems(models, r);
+    }
+
+    private void applyAndAnimateRemovals(List<Note> newModels, RecyclerView r) {
+        for (int i = mNotes.size() - 1; i >= 0; i--) {
+            final Note model = mNotes.get(i);
+            if (!newModels.contains(model)) {
+                removeItem(i, r);
+            }
+        }
+    }
+
+     private void applyAndAnimateAdditions(List<Note> newModels, RecyclerView r) {
+        for (int i = 0, count = newModels.size(); i < count; i++) {
+            final Note model = newModels.get(i);
+            if (!mNotes.contains(model)) {
+                addItem(i, model, r);
+            }
+        }
+    }
+
+     private void applyAndAnimateMovedItems(List<Note> newModels, RecyclerView r) {
+        for (int toPosition = newModels.size() - 1; toPosition >= 0; toPosition--) {
+            final Note model = newModels.get(toPosition);
+            final int fromPosition = mNotes.indexOf(model);
+            if (fromPosition >= 0 && fromPosition != toPosition) {
+                moveItem(fromPosition, toPosition, r);
+            }
+        }
+    }
+
+    public Note removeItem(int position, RecyclerView r) {
+        final Note model = mNotes.remove(position);
+        r.getAdapter().notifyItemRemoved(position);
+        return model;
+    }
+
+    public void addItem(int position, Note model, RecyclerView r) {
+        mNotes.add(position, model);
+        r.getAdapter().notifyItemInserted(position);
+    }
+
+   public void moveItem(int fromPosition, int toPosition, RecyclerView r) {
+       final Note model = mNotes.remove(fromPosition);
+        mNotes.add(toPosition, model);
+       r.getAdapter().notifyItemMoved(fromPosition, toPosition);
+    }
+
 
     //這是一個SQLite數據庫的輔助類。如果我們不用第三方庫的話，直接用android内置的api來讀寫SQL的話，就會用這個類去打開數據庫連接。現在我們用的這個庫要求 我們提供這個類。
     private class NoteSQLOpenHelper extends SQLiteOpenHelper {

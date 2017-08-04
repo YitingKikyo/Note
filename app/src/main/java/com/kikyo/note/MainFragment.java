@@ -43,7 +43,9 @@ public class MainFragment extends Fragment {
         mNoteService = NoteService.getInstance();
         //在这里注册事件监听
         EventBus.getDefault().register(this);
+
     }
+
 
     @Nullable
     @Override
@@ -58,6 +60,7 @@ public class MainFragment extends Fragment {
         initNoteList();
         setUpFAB();
     }
+
 
     private void setUpFAB() {
         FloatingActionButton fb = (FloatingActionButton) mView.findViewById(R.id.floatButton_newNote);
@@ -76,7 +79,7 @@ public class MainFragment extends Fragment {
     private void initNoteList() {
         mNoteList = (RecyclerView) mView.findViewById(R.id.recycler_view);
         mNoteList.setLayoutManager(new LinearLayoutManager(getContext()));
-        mNotes = new ArrayList<>(mNoteService.getAllNotss());
+        mNotes = new ArrayList<>(mNoteService.getAllNotes());
         mNoteList.setAdapter(new NoteListAdapter(mNotes));
         mNoteList.addItemDecoration(new HorizontalDividerItemDecoration.Builder(getContext())
                 .color(R.color.divider)
